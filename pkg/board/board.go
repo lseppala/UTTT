@@ -37,25 +37,27 @@ func (move *Move) Copy() *Move {
 
 func (board *Board) CheckWin() int {
 	columnSum, rowSum := 0, 0
+
 	for ii := 0; ii < 3; ii++ {
 		for jj := 0; jj < 3; jj++ {
 			columnSum += board[3*ii+jj]
 			rowSum += board[ii+3*jj]
-		}
-		switch columnSum {
-		case 3:
-			return 1
-		case -3:
-			return -1
-		}
-		switch rowSum {
-		case 3:
-			return 1
-		case -3:
-			return -1
-		}
-		columnSum, rowSum := 0, 0
 
+			switch columnSum {
+			case 3:
+				return 1
+			case -3:
+				return -1
+			}
+
+			switch rowSum {
+			case 3:
+				return 1
+			case -3:
+				return -1
+			}
+			columnSum, rowSum = 0, 0
+		}
 	}
 	switch board[0] + board[4] + board[8] {
 	case 3:
