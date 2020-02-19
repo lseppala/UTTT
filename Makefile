@@ -8,5 +8,5 @@ help: ## Print this summary of make targets
 .PHONY: help
 build: bin/uttt ## Build UTTT
 
-bin/uttt: cmd/*.go pkg/**/*.go
+bin/uttt: cmd/*.go pkg/*.go
 	@go build -o bin/uttt cmd/main.go
