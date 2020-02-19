@@ -1,6 +1,8 @@
 package uttt
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Board [9]Mark
 
@@ -11,46 +13,12 @@ type Move struct {
 	Spot  int
 }
 
-type Mark int
-
-const (
-	Unoccupied Mark = iota
-	Player1
-	Player2
-)
-
-type HasMark interface {
-	HasMarkAt(i, j int) Mark
-}
-
 func (board Board) HasMarkAt(i, j int) Mark {
 	return board[(i*3)+j]
 }
 
 func (field Field) HasMarkAt(i, j int) Mark {
 	return CheckWin(field[(i*3)+j])
-}
-
-func CheckWin(marked HasMark) Mark {
-	for i := 0; i < 3; i++ {
-		if mark := marked.HasMarkAt(i, 0); mark == marked.HasMarkAt(i, 1) &&
-			mark == marked.HasMarkAt(i, 0) {
-			return mark
-		}
-		if mark := marked.HasMarkAt(0, i); mark == marked.HasMarkAt(1, i) &&
-			mark == marked.HasMarkAt(2, i) {
-			return mark
-		}
-		if mark := marked.HasMarkAt(i, i); mark == marked.HasMarkAt(i, i) &&
-			mark == marked.HasMarkAt(i, i) {
-			return mark
-		}
-		if mark := marked.HasMarkAt(3-i, 3-i); mark == marked.HasMarkAt(3-i, 3-i) &&
-			mark == marked.HasMarkAt(3-i, 3-i) {
-			return mark
-		}
-	}
-	return Unoccupied
 }
 
 func (field *Field) Copy() *Field {
