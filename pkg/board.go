@@ -2,13 +2,55 @@ package uttt
 
 import "fmt"
 
-type Board [9]int
+type Board [9]Mark
 
 type Field [9]Board
 
 type Move struct {
 	Board int
 	Spot  int
+}
+
+type Mark int
+
+const (
+	Unoccupied Mark = iota
+	Player1
+	Player2
+)
+
+type HasMark interface {
+	HasMarkAt(i, j int) Mark
+}
+
+func (board Board) HasMarkAt(i, j int) Mark {
+	return board[(i*3)+j]
+}
+
+func (field Field) HasMarkAt(i, j int) Mark {
+	return CheckWin(field[(i*3)+j])
+}
+
+func CheckWin(marked HasMark) Mark {
+	for i := 0; i < 3; i++ {
+		if mark := marked.HasMarkAt(i, 0); mark == marked.HasMarkAt(i, 1) &&
+			mark == marked.HasMarkAt(i, 0) {
+			return mark
+		}
+		if mark := marked.HasMarkAt(0, i); mark == marked.HasMarkAt(1, i) &&
+			mark == marked.HasMarkAt(2, i) {
+			return mark
+		}
+		if mark := marked.HasMarkAt(i, i); mark == marked.HasMarkAt(i, i) &&
+			mark == marked.HasMarkAt(i, i) {
+			return mark
+		}
+		if mark := marked.HasMarkAt(3-i, 3-i); mark == marked.HasMarkAt(3-i, 3-i) &&
+			mark == marked.HasMarkAt(3-i, 3-i) {
+			return mark
+		}
+	}
+	return Unoccupied
 }
 
 func (field *Field) Copy() *Field {
@@ -21,10 +63,10 @@ func (field *Field) Display() {
 }
 
 func (board *Board) Display() {
-	temp := make(map[int]string)
-	temp[-1] = "O"
-	temp[1] = "X"
-	temp[0] = " "
+	temp := make(map[Mark]string)
+	temp[Unoccupied] = " "
+	temp[Player1] = "X"
+	temp[Player2] = "O"
 
 	for _, s := range *board {
 		fmt.Println(s)
@@ -35,87 +77,9 @@ func (move *Move) Copy() *Move {
 	return &Move{move.Board, move.Spot}
 }
 
-func (board *Board) CheckWin() int {
-	columnSum, rowSum := 0, 0
-
-	for ii := 0; ii < 3; ii++ {
-		for jj := 0; jj < 3; jj++ {
-			columnSum += board[3*ii+jj]
-			rowSum += board[ii+3*jj]
-
-			switch columnSum {
-			case 3:
-				return 1
-			case -3:
-				return -1
-			}
-
-			switch rowSum {
-			case 3:
-				return 1
-			case -3:
-				return -1
-			}
-			columnSum, rowSum = 0, 0
-		}
-	}
-	switch board[0] + board[4] + board[8] {
-	case 3:
-		return 1
-	case -3:
-		return -1
-	}
-	switch board[2] + board[4] + board[6] {
-	case 3:
-		return 1
-	case -3:
-		return -1
-	}
-
-	return 0
-}
-
-func (field *Field) CheckWin() int {
-	var colSum, rowSum int
-	for ii := 0; ii < 3; ii++ {
-		for jj := 0; jj < 3; jj++ {
-			colSum += field[3*ii+jj].CheckWin()
-			rowSum += field[ii+3*jj].CheckWin()
-		}
-		switch colSum {
-		case 3:
-			return 1
-		case -3:
-			return -1
-		}
-		switch rowSum {
-		case 3:
-			return 1
-		case -3:
-			return -1
-		}
-		rowSum, colSum = 0, 0
-	}
-
-	switch field[0].CheckWin() + field[4].CheckWin() + field[8].CheckWin() {
-	case 3:
-		return 1
-	case -3:
-		return -1
-	}
-	switch field[2].CheckWin() + field[4].CheckWin() + field[6].CheckWin() {
-	case 3:
-		return 1
-	case -3:
-		return -1
-	}
-
-	return 0
-}
-
 func (board *Board) GetMoves(boardIndex int) []*Move {
 	moves := make([]*Move, 0, 9)
-	if board.CheckWin() == 0 {
+	if CheckWin(board) == 0 {
 		for index, spot := range board {
 			if spot == 0 {
 				newMove := &Move{boardIndex, index}
@@ -128,15 +92,15 @@ func (board *Board) GetMoves(boardIndex int) []*Move {
 
 func (field *Field) GetMoves(lastMove *Move) []*Move {
 	moves := make([]*Move, 0, 81)
-	if field.CheckWin() == 0 {
+	if CheckWin(field) == 0 {
 		nextBoardIndex := lastMove.Spot
 		nextBoard := field[nextBoardIndex]
 
-		if nextBoard.CheckWin() == 0 {
+		if CheckWin(nextBoard) == 0 {
 			moves = append(moves, nextBoard.GetMoves(nextBoardIndex)...)
 		} else {
 			for index, board := range field {
-				if board.CheckWin() == 0 {
+				if CheckWin(board) == 0 {
 					moves = append(moves, board.GetMoves(index)...)
 				}
 			}
@@ -145,6 +109,6 @@ func (field *Field) GetMoves(lastMove *Move) []*Move {
 	return moves
 }
 
-func (field *Field) MakeMove(move *Move, player int) {
+func (field *Field) MakeMove(move *Move, player Mark) {
 	field[move.Board][move.Spot] = player
 }

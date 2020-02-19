@@ -8,7 +8,7 @@ func TestBoardCheckNoWin(t *testing.T) {
 		0, 0, 0,
 		0, 0, 0,
 	}
-	if win := noWinBoard.CheckWin(); win != 0 {
+	if win := CheckWin(noWinBoard); win != 0 {
 		t.Errorf("Expected 0 (no win), got %d", win)
 	}
 }
@@ -19,7 +19,7 @@ func TestBoardCheckWin(t *testing.T) {
 		0, 1, 0,
 		0, 0, 1,
 	}
-	if win := winBoard.CheckWin(); win != 1 {
+	if win := CheckWin(winBoard); win != Player1 {
 		t.Errorf("Expected 1 (player 1 win), got %d",
 			win)
 	}
@@ -32,7 +32,7 @@ func TestFieldCheckNoWin(t *testing.T) {
 		noWin, noWin, noWin,
 		noWin, noWin, noWin,
 	}
-	if win := noWinField.CheckWin(); win != 0 {
+	if win := CheckWin(noWinField); win != 0 {
 		t.Errorf("Expected 0 (no win), got %d", win)
 	}
 }
@@ -45,7 +45,7 @@ func TestFieldCheckWin(t *testing.T) {
 		noWin, noWin, noWin,
 		noWin, noWin, noWin,
 	}
-	if win := winField.CheckWin(); win != 1 {
+	if win := CheckWin(winField); win != 1 {
 		t.Errorf("Expected 1 (player 1 win), got %d",
 			win)
 	}
